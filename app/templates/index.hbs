@@ -1,0 +1,39 @@
+{{outlet}}
+
+{{nav-menu}}
+
+
+{{!--
+{{list-cards cards=cards.discard}}
+<br>
+{{list-cards cards=cards.shoe}}
+<br>
+--}}
+
+<div class="list-wrap">
+<h1>Shoe</h1>
+<div class="simple-list" >
+{{#ember-collection items=cards.shoe
+  cell-layout=(fixed-grid-layout 115 22) 
+  as |item index|}}
+
+  <div class="shoe-row">
+    <div class="shoe-card {{item.color}}">{{item.name}}</div>
+  </div>
+{{/ember-collection}}
+</div>
+</div>
+
+<div class="list-wrap">
+<h1>Discard</h1>
+<div class="simple-list" >
+{{#ember-collection items=cards.discard
+  cell-layout=(fixed-grid-layout 115 22) 
+  as |item index|}}
+
+  <div class="shoe-row">
+    <div class="shoe-card {{item.color}}">{{item.name}}</div>
+  </div>
+{{/ember-collection}}
+</div>
+</div>
