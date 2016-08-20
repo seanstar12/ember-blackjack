@@ -2,16 +2,23 @@ import Ember from 'ember';
 import {v1, v4} from 'ember-uuid';
 
 export default Ember.Service.extend({
+  store: Ember.inject.service(),
   shoe: Ember.A(),
   discard: Ember.A(),
 
   numOfDecks: 1,
-  numOfShuffle: 1,
+  numOfShuffle: 2,
 
   shuffleShoe: true,
   shuffleNewDeck: true,
   cutBeforeShuffle: true,
 
+
+  init: function(obj) {
+    this._super(...arguments);
+    console.log(obj);
+
+  },
 
   start: function() {
     this._super(...arguments);
@@ -20,46 +27,71 @@ export default Ember.Service.extend({
         numOfShuffle = this.get('numOfShuffle');
        
     for (var i=0; i<numOfDecks; i++) {
-      var newDeck = this._createDeck();
-
-      if (this.get('shuffleNewDeck')) {
-        newDeck = this._shuffle(newDeck);
-      }
-
-      this._addDeckToShoe(newDeck);
+      this.addDeck();
     }
 
-    this.shuffleShoe(numOfShuffle);
   },
 
-  addDeck: function() {
-    var deck = this._createDeck();
+  topCard: Ember.computed('shoe.[]', function() {
+    return this.get('shoe').get('firstObject');
+  }),
 
-    if (this.get('shuffleNewDeck')) {
-      deck = this._shuffle(deck);
+  createDeck: function(type, cards) {
+    var cards = Ember.isPresent(cards) ? cards : Ember.A(),
+        deckId = v4();
+
+    switch (type) {
+      case 'discard':
+      case 'player':
+      case 'empty':
+      case 'shoe':
+        break;
+
+      default:
+        type = 'standard';
+        cards = this._generateCards();  
+        break;
     }
 
-    this._addDeckToShoe(deck);
+    return this.get('store').createRecord('deck', {
+      id: deckId,
+      cards: cards,
+      type: type
+    });
   },
 
-  _createDeck: function() {
+  createDecks: function(count, type) {
+    var decks = [],
+        count = typeof count === 'number' ? count: 1;
+
+    for (var i=0; i<count; i++) {
+      decks.push(this.createDeck(type));
+    };
+
+    return decks;
+  },
+
+  _generateCards: function() {
     var cards = Ember.A(),
-        deckId = v4(),
         special = ['J', 'Q', 'K', 'A'],
-        suits = ['♠', '♣', '♦', '♥'];
+        valString = ['two','three','four','five','six','seven','eight','nine','ten','jack', 'queen', 'king', 'ace'],
+        suits = ['♠', '♣', '♦', '♥'],
+        suitsString = ['club', 'spade', 'diamond', 'heart'];
 
     for (var j=0; j<suits.length; j++) {
       for (var i=2; i<15; i++) {
-        cards.push(Ember.Object.create({
+        var card = this.get('store').createRecord('card', {
           name: ((i>10) ? special[i-11] : i) + " " + suits[j],
           value: (i>10) ? special[i-11] : i,
-          suit: suits[j],
+          rank: valString[i-2],
+          suitChar: suits[j],
+          suit: suitsString[j],
           suitId: j,
           cardNum: i,
-          cardId: v4(),
-          deckId: deckId,
+          id: v4(),
           color: (j>1) ? "red" : "black",
-        }));
+        });
+        cards.pushObject(card);
       }
     }
 
@@ -104,7 +136,9 @@ export default Ember.Service.extend({
     }
   },
 
-  _shuffle: function(cards) {
+  shuffle: function(cards) {
+    console.log('[service][cards]:[_shuffle]');
+    console.log(cards);
     var halfish, left, right, shuffled,
         length = cards.get('length');
 
@@ -126,7 +160,7 @@ export default Ember.Service.extend({
       }
     } while (left.get('length') || right.get('length'));
 
-    return shuffled;
+    return cards;
   },
 
   cutCardsInDeck: function(count) {
@@ -147,9 +181,12 @@ export default Ember.Service.extend({
   },
 
   _addDeckToShoe: function(deck) {
-    var shoe = this.get('shoe');
+    var shoe = this.get('shoe'),
+        _shoe = this._createDeck('shoe'); 
 
-    shoe.pushObjects(deck);
+    //shoe.pushObjects(deck);
+    shoe.push(deck.get('cards'));
+    
   },
 
   _cutCards: function(cards, depth) {

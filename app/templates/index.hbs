@@ -10,6 +10,18 @@
 <br>
 --}}
 
+<div class='info'>
+  <h2>Total Cards</h2>
+  {{cards.shoe.length}}
+</div>
+
+<div class='topCard'>
+  {{#if cards.topCard}}
+  {{playing-card suit=cards.topCard.suit rank=cards.topCard.rank}}
+  {{playing-card suit=cards.topCard.suit rank='back'}}
+  {{/if}}
+</div>
+
 <div class="list-wrap">
 <h1>Shoe</h1>
 <div class="simple-list" >

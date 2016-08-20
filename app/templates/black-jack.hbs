@@ -1,0 +1,20 @@
+<h2>Black Jack</h2>
+
+<div class='info'>
+  <h2>Total Cards</h2>
+  {{shoe.length}}
+</div>
+
+<div class="list-wrap">
+<h1>Shoe</h1>
+<div class="simple-list" >
+{{#ember-collection items=shoe
+  cell-layout=(fixed-grid-layout 115 22) 
+  as |item index|}}
+
+  <div class="shoe-row">
+    <div class="shoe-card {{item.color}}">{{item.name}}</div>
+  </div>
+{{/ember-collection}}
+</div>
+</div>
