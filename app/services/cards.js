@@ -11,14 +11,8 @@ export default Ember.Service.extend({
 
   shuffleShoe: true,
   shuffleNewDeck: true,
-  cutBeforeShuffle: true,
+  cutBeforeShuffle: false,
 
-
-  init: function(obj) {
-    this._super(...arguments);
-    console.log(obj);
-
-  },
 
   start: function() {
     this._super(...arguments);
@@ -36,27 +30,32 @@ export default Ember.Service.extend({
     return this.get('shoe').get('firstObject');
   }),
 
-  createDeck: function(type, cards) {
-    var cards = Ember.isPresent(cards) ? cards : Ember.A(),
+  createDeck: function(type) {
+    var cards = Ember.A(),
         deckId = v4();
 
     switch (type) {
+      case 'standard':
+        cards = this._generateCards();  
+        break;
+
       case 'discard':
       case 'player':
       case 'empty':
       case 'shoe':
-        break;
-
       default:
-        type = 'standard';
-        cards = this._generateCards();  
         break;
     }
 
-    return this.get('store').createRecord('deck', {
-      id: deckId,
-      cards: cards,
-      type: type
+    return this.get('store').push({
+      data: { 
+        id: deckId,
+        type: 'deck',
+        attributes: {
+          cards: cards,
+          type: type
+        }
+      }
     });
   },
 
@@ -76,22 +75,28 @@ export default Ember.Service.extend({
         special = ['J', 'Q', 'K', 'A'],
         valString = ['two','three','four','five','six','seven','eight','nine','ten','jack', 'queen', 'king', 'ace'],
         suits = ['♠', '♣', '♦', '♥'],
-        suitsString = ['club', 'spade', 'diamond', 'heart'];
+        suitsString = ['club', 'spade', 'diamond', 'heart'],
+        batchId = v4();
+
 
     for (var j=0; j<suits.length; j++) {
       for (var i=2; i<15; i++) {
-        var card = this.get('store').createRecord('card', {
-          name: ((i>10) ? special[i-11] : i) + " " + suits[j],
-          value: (i>10) ? special[i-11] : i,
-          rank: valString[i-2],
-          suitChar: suits[j],
-          suit: suitsString[j],
-          suitId: j,
-          cardNum: i,
+        var card = {
           id: v4(),
-          color: (j>1) ? "red" : "black",
-        });
-        cards.pushObject(card);
+          type: 'card',
+          attributes: {
+            name: ((i>10) ? special[i-11] : i) + " " + suits[j],
+            value: (i>10) ? special[i-11] : i,
+            rank: valString[i-2],
+            suitChar: suits[j],
+            suit: suitsString[j],
+            suitId: j,
+            cardNum: i,
+            batchId: batchId,
+            color: (j>1) ? "redCard" : "blackCard",
+          }
+        };
+        cards.push(card);
       }
     }
 
@@ -136,31 +141,38 @@ export default Ember.Service.extend({
     }
   },
 
-  shuffle: function(cards) {
-    console.log('[service][cards]:[_shuffle]');
-    console.log(cards);
+  shuffle: function(cards, count) {
+    var self = this;
     var halfish, left, right, shuffled,
         length = cards.get('length');
 
-    if (this._randDo() || this.get('cutBeforeShuffle')) {
-      cards = this._cutCards(cards, this._randHalf(length));
-    }
-
-    halfish = this._randHalf(length),
-    left = cards.slice(0, halfish);
-    right = cards.slice(halfish, length);
-    shuffled = [];
-
-    do {
-      if (left.get('length') && this._randDo()) {
-        shuffled.push(left.pop());
+    return new Ember.RSVP.Promise(function(resolve) {
+      if (self._randDo() || self.get('cutBeforeShuffle')) {
+        cards = self._cutCards(cards, self._randHalf(length));
       }
-      if (right.get('length') && this._randDo()) {
-        shuffled.push(right.pop());
-      }
-    } while (left.get('length') || right.get('length'));
 
-    return cards;
+      halfish = self._randHalf(length),
+      left = cards.slice(0, halfish);
+      right = cards.slice(halfish, length);
+      shuffled = [];
+
+      do {
+        if (left.get('length') && self._randDo()) {
+          shuffled.push(left.pop());
+        }
+        if (right.get('length') && self._randDo()) {
+          shuffled.push(right.pop());
+        }
+      } while (left.get('length') || right.get('length'));
+
+      if (count > 1) {
+        count = count-1;
+        resolve(self.shuffle(shuffled, count));
+      }
+      else {
+        resolve({data:shuffled});
+      }
+    }, '[service][cards]:[shuffle]');
   },
 
   cutCardsInDeck: function(count) {
@@ -180,17 +192,7 @@ export default Ember.Service.extend({
     } while (count);
   },
 
-  _addDeckToShoe: function(deck) {
-    var shoe = this.get('shoe'),
-        _shoe = this._createDeck('shoe'); 
-
-    //shoe.pushObjects(deck);
-    shoe.push(deck.get('cards'));
-    
-  },
-
   _cutCards: function(cards, depth) {
-    console.log('cutCards');
     var cutCards = Ember.A(),
         depth = (typeof depth === 'number') ? depth : 1,
         a,b;
@@ -206,11 +208,10 @@ export default Ember.Service.extend({
 
   _randHalf: function(max) {
     var sign = this._randDo() ? 1 : -1,
-        max = Math.floor(((typeof max === 'number') ? max : 0) /6),
         half = Math.floor(max / 2),
         ish;
 
-    ish = Math.floor(Math.random() * (max)) * sign;
+    ish = Math.floor(Math.random() * (half / 4)) * sign;
 
     return half + ish;
   },

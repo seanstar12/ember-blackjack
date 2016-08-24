@@ -6,7 +6,6 @@ export default Ember.Controller.extend({
 
   init: function() {
     this._super(...arguments);
-    this.get('cards').start();
   },
 
 });

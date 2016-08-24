@@ -1,0 +1,95 @@
+// Fix for Roboto font path
+$roboto-font-path: '../assets/';
+
+// Materialize styles
+@import "materialize";
+
+@import 'materialize-variables';
+
+body {
+  background-color: $my-background;
+}
+
+header, main, footer {
+  padding-left: 250px;
+}
+
+@media only screen and (max-width : 992px) {
+  header, main, footer {
+    padding-left: 0;
+  }
+}
+
+.redCard {
+  background-color: inherit;
+  color: red;
+}
+.blackCard {
+  background-color: inherit;
+  color: black;
+}
+
+.players {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.basic-card {
+  width: 380px;
+  margin: .5em .2em;
+}
+
+.player-cards {
+  min-height: 50px;
+}
+
+.mini-card {
+  display: inline-block;
+  margin: 2px;
+  border-radius: 3px;
+  border: 1px solid #333;
+  width: 35px;
+  text-align: center;
+}
+
+.nav-bar {
+  nav {
+    z-index: 1000;
+    .nav-wrapper {
+      .button-collapse {
+        margin-left: 20px;
+      }
+    }
+  }
+  .brand-logo {
+    padding-left: 20px;
+    max-width: 80%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+  }
+  .side-nav {
+    li:first-child {
+      margin-top: 70px;
+    }
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.thin-inputs {
+  .red-text {
+    display: none;
+  }
+}
+
+table tfoot {
+  border-top: 1px grey solid;
+  td {
+    font-weight: bold;
+  }
+}

@@ -6,4 +6,5 @@ export default Model.extend({
   cards: hasMany('card', {'inverse':'deck'}),
   type: attr(),
 
+  player: belongsTo('player', {inverse:'deck', async: false})
 });

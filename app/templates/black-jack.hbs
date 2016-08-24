@@ -1,20 +1,52 @@
-<h2>Black Jack</h2>
+<ul class="collection">
+  <li class="collection-item">
+    Shoe Cards
+    {{md-badge class='deep-purple white-text' text=shoe.cards.length}}
+  </li>
+  <li class="collection-item">
+    Players
+    {{md-badge class='deep-orange lighten-2 white-text' text=players.length}}
+  </li>
+  <ul class="collection-item">
+  {{#if shoe.cards.length}}
+      {{#each shoe.cards as |card|}}
+        <li class="mini-card {{card.color}}">{{card.name}}</li> 
+      {{/each}}
+  {{else}}
+    <li>Shoe Is Empty</li> 
+  {{/if}}
+  </ul>
+</ul>
 
-<div class='info'>
-  <h2>Total Cards</h2>
-  {{shoe.length}}
-</div>
+<div class='players'>
 
-<div class="list-wrap">
-<h1>Shoe</h1>
-<div class="simple-list" >
-{{#ember-collection items=shoe
-  cell-layout=(fixed-grid-layout 115 22) 
-  as |item index|}}
+  {{#each players as |player|}}
+    {{#md-card title=player.name class="basic-card"}}
+        {{#md-card-content}}
+          <div class="player-cards">
+            {{#if player.deck.cards.length}}
+              <ul>
+              {{#each player.deck.cards as |card|}} 
+                <li class="mini-card {{card.color}}">{{card.name}}</li> 
+              {{/each}}
+              </ul>
+            {{else}}
+              <span>No Cards</span>
+            {{/if}}
+          </div>
+        {{/md-card-content}}
+        {{#md-card-action}}
+            {{md-btn-submit text='Give Card'
+              buttonType="flat" class='pink darken-1 white-text'
+              action=(action 'giveCard' player)}}
+            {{md-btn-submit text='Hit'
+              buttonType="flat" class='pink darken-1 white-text'
+              action=(action 'giveCard' player)}}
+            {{md-btn-submit text='Stand'
+              buttonType="flat" class='pink darken-1 white-text'
+              action=(action 'giveCard' player)}}
+        {{/md-card-action}}
+    {{/md-card}}
+  {{/each}}
 
-  <div class="shoe-row">
-    <div class="shoe-card {{item.color}}">{{item.name}}</div>
-  </div>
-{{/ember-collection}}
-</div>
 </div>

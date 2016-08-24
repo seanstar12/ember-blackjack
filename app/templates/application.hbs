@@ -1,0 +1,16 @@
+{{#nav-bar}}
+  {{#link-to 'index' tagName='li'}}
+    {{link-to 'Index' 'index'}}
+  {{/link-to}}
+  {{#link-to 'black-jack' tagName='li'}}
+    {{link-to 'BlackJack' 'black-jack'}}
+  {{/link-to}}
+  {{#link-to 'war' tagName='li'}}
+    {{link-to 'War' 'war'}}
+  {{/link-to}}
+{{/nav-bar}}
+<main>
+{{outlet}}
+</main>
+{{!-- ember-cli-materialize modal container --}}
+{{md-modal-container}}
